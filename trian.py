@@ -6,14 +6,23 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from model import LSTMModel
+from model import LSTMModel, AttentionLSTM
+import argparse
+
+###--------------------------- Setup ---------------------------
+## Get extra argument
+parser = argparse.ArgumentParser(description='Add these argument for training')
+parser.add_argument('--dir', default='results', help='directory for saving trianed mode')
+parser.add_argument('--model', default='LSTM', help='LSTM, BuffedLSTM, AttentionLSTM')
+args = parser.parse_args()
 
 ## Set directory for saved model
-directory = 'results-01'
+directory = args.dir
 
 ## Check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
+
 
 
 ###--------------------------- Data Preparation ---------------------------
@@ -70,9 +79,18 @@ batch_size = 32
 
 if __name__ == '__main__':
     ## Initialize the model, loss function, and optimizer
-    model = LSTMModel(n_hidden, n_lstm_layers).to(device)
+    model_selection = args.model
+    if model_selection == 'LSTM':
+        model = LSTMModel(n_hidden, n_lstm_layers).to(device)
+    elif model_selection == 'BuffedLSTM':
+        model = LSTMModel(5, 3).to(device)
+    elif model_selection == 'AttentionLSTM':
+        model = AttentionLSTM(n_hidden, n_lstm_layers).to(device)
+    
+    print(f'\n------------- Training with {model_selection} -------------')
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    
 
     ## Training loop
     best_val_loss = 1e9

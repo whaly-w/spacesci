@@ -22,22 +22,3 @@ class LSTMModel(nn.Module):
         out, _ = self.lstm(x, (h0, c0))
         out = self.fc(out[:, -1, :])
         return out
-    
-    
-class AttentionLSTM(nn.Module):
-    def __init__(self, n_hidden, n_lstm_layers=1):
-        super(AttentionLSTM, self).__init__()
-        self.lstm = nn.LSTM(3, n_hidden, n_lstm_layers, batch_first=True)
-        self.attention = nn.Linear(n_hidden, n_hidden)  # Attention mechanism
-        self.fc = nn.Linear(n_hidden, 6)
-
-    def forward(self, x):
-        # x shape: (batch_size, seq_len, input_size)
-        lstm_out, _ = self.lstm(x)  # lstm_out shape: (batch_size, seq_len, hidden_size)
-
-        # Attention mechanism
-        attention_weights = nn.functional.softmax(self.attention(lstm_out), dim=1)  # (batch_size, seq_len, hidden_size)
-        attention_applied = torch.sum(attention_weights * lstm_out, dim=1)  # (batch_size, hidden_size)
-
-        out = self.fc(attention_applied)  # (batch_size, output_size)
-        return out
