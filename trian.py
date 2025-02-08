@@ -14,6 +14,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Add these argument for training')
 parser.add_argument('--dir', default='results', help='directory for saving trianed mode')
 parser.add_argument('--model', default='LSTM', help='LSTM, BuffedLSTM, AttentionLSTM')
+parser.add_argument('--dataset', default=10, help='dataset size [10y, 20y]')
 args = parser.parse_args()
 
 ## Set directory for saved model
@@ -27,7 +28,8 @@ print(device)
 
 ###--------------------------- Data Preparation ---------------------------
 ## Read data from CSV
-doc = pd.read_csv('./datasets/dataset.csv')
+dataset_size = args.dataset
+doc = pd.read_csv('./datasets/dataset.csv') if dataset_size == 10 else pd.read_csv('./datasets_20y/dataset.csv')
 
 ## Drop out timestamp
 doc = doc.drop(columns= 'datatime')
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     elif model_selection == 'AttentionLSTM':
         model = AttentionLSTM(n_hidden, n_lstm_layers).to(device)
     
-    print(f'\n------------- Training with {model_selection} -------------')
+    print(f'\n------------- Training {model_selection} with {dataset_size}y dataset -------------')
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
