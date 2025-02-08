@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from model import LSTMModel, AttentionLSTM
+from model import LSTMModel, AttentionLSTM, CNNLSTMModel
 import argparse
 
 ###--------------------------- Setup ---------------------------
@@ -88,6 +88,9 @@ if __name__ == '__main__':
         model = LSTMModel(5, 3).to(device)
     elif model_selection == 'AttentionLSTM':
         model = AttentionLSTM(n_hidden, n_lstm_layers).to(device)
+    elif model_selection == 'CNNLSTM':
+        model = CNNLSTMModel(n_hidden, n_lstm_layers).to(device)
+        
     
     print(f'\n------------- Training {model_selection} with {dataset_size}y dataset -------------')
     criterion = nn.MSELoss()
