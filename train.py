@@ -6,19 +6,25 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from model import LSTMModel, AttentionLSTM, CNNLSTMModel
+from model import LSTMModel, CNNLSTMModel
 import argparse
 
 ###--------------------------- Setup ---------------------------
 ## Get extra argument
 parser = argparse.ArgumentParser(description='Add these argument for training')
 parser.add_argument('--dir', default='results', help='directory for saving trianed mode')
-parser.add_argument('--model', default='LSTM', help='LSTM, BuffedLSTM, AttentionLSTM')
-parser.add_argument('--dataset', default=10, help='dataset size [10y, 20y]')
+parser.add_argument('--model', default='LSTM', help='LSTM, BuffedLSTM, CNNLSTM')
+
+parser.add_argument('--lr', default=0.001, help='learning rate')
+parser.add_argument('--epochs', default=1000, help='epoch number')
+parser.add_argument('--batch_size', default=32)
 args = parser.parse_args()
 
-## Set directory for saved model
-directory = args.dir
+## Set parameter for the model
+directory = args.dir                # directory for saving model
+batch_size = int(args.batch_size)   # batch size
+learning_rate = float(args.lr)
+num_epochs = int(args.epochs)
 
 ## Check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -28,8 +34,7 @@ print(device)
 
 ###--------------------------- Data Preparation ---------------------------
 ## Read data from CSV
-dataset_size = args.dataset
-doc = pd.read_csv('./datasets/dataset.csv') if dataset_size == 10 else pd.read_csv('./datasets_20y/dataset.csv')
+doc = pd.read_csv('./datasets_20y/dataset.csv')
 
 ## Drop out timestamp
 doc = doc.drop(columns= 'datatime')
@@ -44,13 +49,13 @@ scaler = MinMaxScaler()
 normalized_data = scaler.fit_transform(data)
 # print(normalized_data)
 
-## Create data sequence
+## Create data sequence using sliding widow technique
 x, y = [], []
 input_length = 24
 output_length = 6
-for i in range(len(data) - input_length - output_length + 1):
-    x.append(data[i:i+input_length])  # Input sequence (24 time steps)
-    y.append(data[i+input_length : i+input_length+output_length, 2]) 
+for i in range(len(normalized_data) - input_length - output_length + 1):
+    x.append(normalized_data[i:i+input_length])
+    y.append(normalized_data[i+input_length : i+input_length+output_length, 2]) 
 x = np.array(x)
 y = np.array(y)
 print(x.shape, y.shape)
@@ -67,32 +72,27 @@ print(f'Train:\t{x_train.shape}, {y_train.shape}\nVal:\t{x_val.shape}, {y_val.sh
 train_dataset = TensorDataset(x_train, y_train)
 val_dataset = TensorDataset(x_val, y_val)
 
-train_loader = DataLoader(train_dataset, batch_size= 32, shuffle= True)
-val_loader = DataLoader(val_dataset, batch_size= 32, shuffle= False)
+train_loader = DataLoader(train_dataset, batch_size= batch_size, shuffle= True)
+val_loader = DataLoader(val_dataset, batch_size= batch_size, shuffle= False)
 
 
 ###--------------------------- Model Preparation ---------------------------
 ## Tuning Parameters
 n_hidden = 2  # Number of LSTM hidden units
 n_lstm_layers = 1  # Number of LSTM layers
-learning_rate = 0.001
-num_epochs = 10000
-batch_size = 32
 
 if __name__ == '__main__':
     ## Initialize the model, loss function, and optimizer
     model_selection = args.model
     if model_selection == 'LSTM':
-        model = LSTMModel(n_hidden, n_lstm_layers).to(device)
+        model = LSTMModel(2, 1).to(device)
     elif model_selection == 'BuffedLSTM':
         model = LSTMModel(5, 3).to(device)
-    elif model_selection == 'AttentionLSTM':
-        model = AttentionLSTM(n_hidden, n_lstm_layers).to(device)
     elif model_selection == 'CNNLSTM':
-        model = CNNLSTMModel(n_hidden, n_lstm_layers).to(device)
+        model = CNNLSTMModel(32, 4).to(device)
         
     
-    print(f'\n------------- Training {model_selection} with {dataset_size}y dataset -------------')
+    print(f'\n------------- Training {model_selection} with lr: {learning_rate}, batch size: {batch_size}, n_epochs: {num_epochs} -------------')
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     

@@ -46,15 +46,18 @@ class AttentionLSTM(nn.Module):
     
 
 class CNNLSTMModel(nn.Module):
-    def __init__(self, n_hidden, n_lstm_layers=1, kernel_size=3, stride=1, dropout=0.2):
+    def __init__(self, n_cnn_hidden, n_lstm_hidden, n_lstm_layers=1, kernel_size=3, stride=1, dropout=0.2, n_input= 3, n_output= 6):
         super(CNNLSTMModel, self).__init__()
-        self.n_hidden = n_hidden
+        self.n_hidden = {
+            'n_lstm_hidden': n_lstm_hidden,
+            'n_cnn_hidden_layer': n_cnn_hidden
+        }
         self.n_lstm_layers = n_lstm_layers
         
         # 1D CNN layer
         self.cnn = nn.Conv1d(
-            in_channels= 3,  # Number of input features (a, b, c)
-            out_channels= n_hidden,  # Number of output channels (same as LSTM hidden size)
+            in_channels= n_input,  # Number of input features (a, b, c)
+            out_channels= n_cnn_hidden,  # Number of output channels (same as LSTM hidden size)
             kernel_size= kernel_size,  # Size of the convolutional kernel
             stride= stride,  # Stride of the convolution
             padding= (kernel_size - 1) // 2  # Padding to maintain sequence length
@@ -65,15 +68,15 @@ class CNNLSTMModel(nn.Module):
         
         # LSTM layer
         self.lstm = nn.LSTM(
-            input_size=n_hidden,  # Input size to LSTM (same as CNN output channels)
-            hidden_size=n_hidden,  # Number of LSTM hidden units
+            input_size=n_cnn_hidden,  # Input size to LSTM (same as CNN output channels)
+            hidden_size=n_lstm_hidden,  # Number of LSTM hidden units
             num_layers=n_lstm_layers,  # Number of LSTM layers
             batch_first=True,  # Input shape: (batch_size, seq_length, input_size)
             dropout=dropout if n_lstm_layers > 1 else 0  # Dropout for multi-layer LSTM
         )
         
         # Fully connected layer
-        self.fc = nn.Linear(n_hidden, 6)  # Output size is 1
+        self.fc = nn.Linear(n_lstm_hidden, n_output)  # Output size is 1
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def forward(self, x):
@@ -88,8 +91,8 @@ class CNNLSTMModel(nn.Module):
         x = x.permute(0, 2, 1)
         
         # Initialize hidden state and cell state for LSTM
-        h0 = torch.zeros(self.n_lstm_layers, x.size(0), self.n_hidden).to(self.device)
-        c0 = torch.zeros(self.n_lstm_layers, x.size(0), self.n_hidden).to(self.device)
+        h0 = torch.zeros(self.n_lstm_layers, x.size(0), self.n_hidden['n_lstm_hidden']).to(self.device)
+        c0 = torch.zeros(self.n_lstm_layers, x.size(0), self.n_hidden['n_lstm_hidden']).to(self.device)
         
         # Apply LSTM
         out, _ = self.lstm(x, (h0, c0))  # Output shape: (batch_size, seq_length // 2, hidden_size)
