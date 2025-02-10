@@ -1,9 +1,9 @@
 ## Overall About the Model
 This model uses **three features** — Hp60, SN, and F10.7 — as and input to predict Hp60 in the next six hours.
-``` model.py ``` is the model architecture.
-``` main.py ``` is the python file for testing the model
-``` train_v3.py ``` is the python file for training the data
-``` dataset_prep_V2.py ``` is the python file for preparing the data
+- ``` model.py ``` is the model architecture.
+- ``` main.py ``` is the python file for testing the model
+- ``` train_v3.py ``` is the python file for training the data
+- ``` dataset_prep_V2.py ``` is the python file for preparing the data
 
 ## Data Preparation
 ### Data Gathering
