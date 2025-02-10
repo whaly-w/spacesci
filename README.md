@@ -21,5 +21,5 @@ These are the link to the data for testing
 ``` python3 dataset_prep_V3.py --dir folderName ```
 
 ## Test the Model
-run **main.py** and set the arugument --dir_data as the dataset directory (the name of the folder you created)  <br/>
-``` python3 main.py --dir_data datasets_test ```
+run **main.py** and set the argument --dir_data as the dataset directory (the name of the folder you created)  <br/>
+``` python3 main.py --dir_data folderName ```
