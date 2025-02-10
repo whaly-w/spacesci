@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from model import LSTMModel, CNNLSTMModel
 import argparse
+# from torch.utils.tensorboard import SummaryWriter
 
 ###--------------------------- Setup ---------------------------
 ## Get extra argument
@@ -81,6 +82,9 @@ val_loader = DataLoader(val_dataset, batch_size= batch_size, shuffle= False)
 n_hidden = 2  # Number of LSTM hidden units
 n_lstm_layers = 1  # Number of LSTM layers
 
+## Create write for tensor board
+# writer = SummaryWriter(f'./{directory}/tensorboard')
+
 if __name__ == '__main__':
     ## Initialize the model, loss function, and optimizer
     model_selection = args.model
@@ -104,7 +108,7 @@ if __name__ == '__main__':
         ## Training phase
         model.train()
         train_loss = 0.0
-        for batch_X, batch_y in train_loader:
+        for i, (batch_X, batch_y) in enumerate(train_loader):
             outputs = model(batch_X)
             loss = criterion(outputs, batch_y)
             
@@ -113,7 +117,16 @@ if __name__ == '__main__':
             optimizer.step()
             
             train_loss += loss.item()
-        
+            
+            # # Save train loss of each batch
+            # writer.add_scalar("Loss/train", loss.item(), epoch * len(train_loader) + i)  # Log loss for each batch
+            
+            # # save gradients
+            # for name, param in model.named_parameters():
+            #     if param.grad is not None:  # Check if gradients exist
+            #         writer.add_histogram(f"Gradients/{name}", param.grad, epoch)
+            
+
         ## Calculate average training loss
         train_loss /= len(train_loader)
         
@@ -126,6 +139,9 @@ if __name__ == '__main__':
                 outputs = model(batch_x)
                 loss = criterion(outputs, batch_y)
                 val_loss += loss.item()
+                
+                # save val loss
+                # writer.add_scalar("Loss/val", val_loss, epoch)
         
         ## Calculate average validation loss
         val_loss /= len(val_loader)
@@ -148,6 +164,7 @@ if __name__ == '__main__':
             }
             torch.save(checkpoint, f'./{directory}/model{round(best_val_loss*10000)}.pth')
             torch.save(checkpoint, f'./{directory}/best_model.pth')
-            
+    
+    # writer.close()
     print('Training Complete...')
     print(f'Best model saved at epoch {best_epoch} with validation loss: {best_val_loss:.4f}')

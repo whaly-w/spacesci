@@ -75,6 +75,9 @@ class CNNLSTMModel(nn.Module):
             dropout=dropout if n_lstm_layers > 1 else 0  # Dropout for multi-layer LSTM
         )
         
+        # Batch normalizer
+        self.batch_norm = nn.BatchNorm1d(n_lstm_hidden)
+        
         # Fully connected layer
         self.fc = nn.Linear(n_lstm_hidden, n_output)  # Output size is 1
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -97,7 +100,10 @@ class CNNLSTMModel(nn.Module):
         # Apply LSTM
         out, _ = self.lstm(x, (h0, c0))  # Output shape: (batch_size, seq_length // 2, hidden_size)
         
+        # Apply batch normalizer before DENSE layer
+        out = self.batch_norm(out[:, -1, :])
+        
         # Use the output of the last time step
-        out = self.fc(out[:, -1, :])  # Output shape: (batch_size, output_size)
+        out = self.fc(out)  # Output shape: (batch_size, output_size)
         
         return out
