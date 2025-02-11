@@ -38,9 +38,7 @@ print(device)
 doc = pd.read_csv('./datasets_20y/dataset.csv')
 
 ## Drop out timestamp
-doc = doc.drop(columns= 'datatime')
-doc = doc.drop(columns= 'Kp')
-doc = doc.drop(columns= 'Hp60')
+doc = doc.drop(columns= ['datatime', 'Hp60'])
 print(doc.head())
 
 
@@ -63,7 +61,7 @@ for i in range(len(normalized_data) - input_length - output_length + 1):
 x = np.array(x)
 y = np.array(y)
 print(x.shape, y.shape)
-print(y)
+# print(y)
 
 ## Convert data to PyTorch tensor
 x_ten = torch.tensor(x, dtype= torch.float32).to(device)
@@ -84,12 +82,12 @@ val_loader = DataLoader(val_dataset, batch_size= batch_size, shuffle= False)
 ###--------------------------- Model Preparation ---------------------------
 if __name__ == '__main__':
     ## Initialize the model, loss function, and optimizer
-    model = AutoregLSTM(64, 48).to(device)
+    model = AutoregLSTM(64, 48, dropout= 0.4).to(device)
         
     
     print(f'\n------------- Training with lr: {learning_rate}, batch size: {batch_size}, n_epochs: {num_epochs} -------------')
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay= 0.0001)
     
 
     ## Training loop

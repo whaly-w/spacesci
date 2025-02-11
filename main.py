@@ -37,7 +37,7 @@ doc = pd.read_csv(f'./{directory}/dataset.csv')
 
 ## Drop out timestamp
 target_Hp60 = doc['Hp60']
-doc = doc.drop(columns= ['datatime', 'Kp', 'Hp60'])
+doc = doc.drop(columns= ['datatime', 'Hp60'])
 print(doc.head())
 
 ## Convert to np array
