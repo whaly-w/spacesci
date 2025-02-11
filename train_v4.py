@@ -39,7 +39,7 @@ print(device)
 doc = pd.read_csv('./datasets_20y/dataset.csv')
 
 ## Drop out timestamp
-doc = doc.drop(columns= ['datatime', 'Hp60'])
+doc = doc.drop(columns= ['datetime', 'Hp60'])
 
 feature = args.feature
 if feature == 'SN': doc = doc.drop(columns='SN')

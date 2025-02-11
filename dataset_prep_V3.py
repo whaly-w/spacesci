@@ -49,7 +49,7 @@ df_data = []
 for i, timestamp in enumerate(data_HP60['datetime']):
     
     df_data.append({
-        'datatime': timestamp,
+        'datetime': timestamp,
         'SN': data_VAL['SN'][i//24],
         'F10.7': data_VAL['F10.7'][i//24],
         'Hp60': data_HP60['Hp60'][i],
