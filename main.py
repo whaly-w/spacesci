@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description='Add these argument for training')
 parser.add_argument('--dir', required= True, help='directory for the test data')
 parser.add_argument('--model', required= True, help='SN, F107')
 
-parser.add_argument('--dir_model', default='results_two', help='directory for the saved model')
+parser.add_argument('--dir_model', default='results_final', help='directory for the saved model')
 
 args = parser.parse_args()
 
@@ -96,7 +96,8 @@ if __name__ == '__main__':
         y_pred_origin = np.exp(y_pred_denomalized) - np.ones(y_pred_denomalized.shape)
             
         
-        print(f'Case {i+1} - MSE Loss: {mean_squared_error(y_target, y_pred_origin.reshape(-1)):.3f}, Norm MSE Loss: {mean_squared_error(y_target_normal, y_pred_scaler.reshape(-1)):.3f}')
+        print(f'Case {i+1}\t| MSE Loss: {mean_squared_error(y_target, y_pred_origin.reshape(-1)):.3f}, Norm MSE Loss: {mean_squared_error(y_target_normal, y_pred_scaler.reshape(-1)):.3f}')
+        print(f'\t| RMSE Loss: {root_mean_squared_error(y_target, y_pred_origin.reshape(-1)):.3f}, RNorm MSE Loss: {root_mean_squared_error(y_target_normal, y_pred_scaler.reshape(-1)):.3f}')
         print(f'target -> {y_target}')
         print(f'pred   -> {np.array([round(j, 3) for j in y_pred_origin.reshape(-1)])}\n')
 
