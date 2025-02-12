@@ -80,7 +80,7 @@ print(f'Train:\t{x_train.shape}, {y_train.shape}\nVal:\t{x_val.shape}, {y_val.sh
 train_dataset = TensorDataset(x_train, y_train)
 val_dataset = TensorDataset(x_val, y_val)
 
-train_loader = DataLoader(train_dataset, batch_size= batch_size, shuffle= True)
+train_loader = DataLoader(train_dataset, batch_size= batch_size, shuffle= False)
 val_loader = DataLoader(val_dataset, batch_size= batch_size, shuffle= False)
 
 
